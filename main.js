@@ -183,7 +183,6 @@ function init(tractsGeojson, municipiosGeojson, incomeData) {
       const hi = currency.format(edges[i + 1]);
       html += `<div class="legend-row"><span class="legend-swatch" style="background:${COLOR_RAMP[i]}"></span><span class="legend-label">${lo} – ${hi}</span></div>`;
     }
-    html += `<div class="legend-row"><span class="legend-swatch" style="background:${NO_DATA_COLOR}"></span><span class="legend-label">Sin datos</span></div>`;
     legendEl.innerHTML = html;
   }
 
