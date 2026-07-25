@@ -4,6 +4,11 @@ name: Fetch ACS income data (manual)
 # to refresh public/pr_income_tracts.geojson with the latest vintage.
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fetch-data.yml'
+      - 'scripts/fetch-acs-income.mjs'
 
 jobs:
   fetch:
