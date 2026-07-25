@@ -328,6 +328,7 @@ function init(tractsGeojson, municipiosGeojson, incomeData) {
   const expandBtn = document.getElementById('expand-btn');
   function collapseMenu() { mainHeader.classList.add('collapsed'); expandBtn.classList.remove('hidden'); }
   function expandMenu() { mainHeader.classList.remove('collapsed'); expandBtn.classList.add('hidden'); }
+  function isMobile() { return window.innerWidth <= 700; }
   if (collapseBtn) collapseBtn.addEventListener('click', collapseMenu);
   if (expandBtn) expandBtn.addEventListener('click', expandMenu);
 
@@ -383,6 +384,7 @@ function init(tractsGeojson, municipiosGeojson, incomeData) {
       map.flyTo({ center: [-66.45, 18.2], zoom: 8.3 });
       if (clearBtn) clearBtn.style.display = 'none';
       municipioSummary.textContent = '';
+      if (isMobile()) collapseMenu();
       return;
     }
 
@@ -405,6 +407,7 @@ function init(tractsGeojson, municipiosGeojson, incomeData) {
     } else {
       municipioSummary.textContent = 'Sin datos suficientes para este municipio.';
     }
+    if (isMobile()) collapseMenu();
   });
 
   clearBtn?.addEventListener('click', () => {
