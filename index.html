@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Puerto Rico: Ingresos — Ingreso Mediano por Sector Censal</title>
+    <meta name="description" content="Mapa interactivo del ingreso mediano por hogar en cada sector censal de Puerto Rico, según la Encuesta sobre la Comunidad (ACS) de 5 años del Censo de EE. UU." />
+
+    <!-- MapLibre GL CSS -->
+    <link href="https://unpkg.com/maplibre-gl@4.0.0/dist/maplibre-gl.css" rel="stylesheet" />
+    <!-- Google Fonts (mismas que Puerto Rico Geológico y Pueblos de Puerto Rico) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Vollkorn:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-VSL9FZ6W7P"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-VSL9FZ6W7P');
+    </script>
+  </head>
+  <body>
+    <div id="app">
+      <!-- Loading Overlay -->
+      <div id="loading-overlay" class="loading-overlay pointer-events-auto">
+        <div class="loading-content">
+          <h2 class="loading-text headline-md">Cargando datos del Censo...</h2>
+          <div class="scan-progress-bar loading-bar-container">
+            <div id="loading-progress-fill" class="scan-progress-fill"></div>
+          </div>
+          <div class="mono-data" id="loading-pct">0%</div>
+        </div>
+      </div>
+
+      <div id="map"></div>
+
+      <div id="ui-overlay" class="panel pointer-events-none">
+        <button id="expand-btn" class="expand-btn pointer-events-auto hidden" aria-label="Mostrar menú">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 12H21M3 6H21M3 18H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+
+        <div id="main-header" class="header pointer-events-auto">
+          <div class="header-top" style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+              <h1 class="headline-md">Ingresos de Puerto Rico</h1>
+              <p class="body-sm subtitle">Ingreso mediano por hogar, por sector censal</p>
+            </div>
+            <button id="collapse-btn" class="collapse-btn" aria-label="Ocultar menú">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+
+          <select id="municipio-select" class="municipio-dropdown pointer-events-auto">
+            <option value="">Seleccionar Municipio...</option>
+          </select>
+          <button id="clear-municipio-btn" class="clear-selection-btn pointer-events-auto" style="display: none;">
+            Volver a Toda la Isla (Limpiar)
+          </button>
+          <button id="locate-btn" class="scan-button pointer-events-auto">Ver Mi Sector Censal</button>
+
+          <div id="legend" class="legend"></div>
+
+          <p class="body-sm source-note" id="source-note">Fuente: Census Bureau, ACS 5 años</p>
+        </div>
+      </div>
+
+      <!-- Side Panel -->
+      <div id="info-panel" class="info-panel pointer-events-auto closed">
+        <button id="close-panel" class="close-btn" aria-label="Cerrar">&times;</button>
+        <div id="info-content" class="info-content"></div>
+      </div>
+
+      <!-- Footer Info -->
+      <div id="footer-info" class="footer-info pointer-events-auto">
+        <div class="usgs-credit">
+          Datos: U.S. Census Bureau, <a href="https://www.census.gov/programs-surveys/acs" target="_blank">American Community Survey</a>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="/main.js"></script>
+  </body>
+</html>
