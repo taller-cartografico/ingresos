@@ -55,10 +55,10 @@ function hideLoadingOverlay() {
 }
 
 const mapLoaded = new Promise((resolve) => map.on('load', resolve)).then((r) => {
-  // Strip road/street labels and lines from the basemap so the choropleth reads cleanly.
-  const roadKeywords = ['road', 'street', 'bridge', 'tunnel', 'path', 'highway'];
+  // Strip roads, buildings, and other basemap clutter so the choropleth reads cleanly.
+  const stripKeywords = ['road', 'street', 'bridge', 'tunnel', 'path', 'highway', 'building'];
   map.getStyle().layers.forEach((layer) => {
-    if (roadKeywords.some((keyword) => layer.id.toLowerCase().includes(keyword))) {
+    if (stripKeywords.some((keyword) => layer.id.toLowerCase().includes(keyword))) {
       map.removeLayer(layer.id);
     }
   });
