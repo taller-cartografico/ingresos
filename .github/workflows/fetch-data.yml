@@ -1,7 +1,7 @@
 name: Fetch ACS income data (manual)
 
 # Re-run this whenever the Census Bureau publishes a new ACS 5-year release,
-# to refresh public/pr_income_tracts.geojson with the latest vintage.
+# to refresh public/pr_income_by_tract.json with the latest vintage.
 on:
   workflow_dispatch:
   push:
@@ -22,16 +22,13 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install dependencies
-        run: npm install --no-save shpjs
-
-      - name: Fetch and join ACS income data
+      - name: Fetch ACS income data
+        env:
+          CENSUS_API_KEY: ${{ secrets.CENSUS_API_KEY }}
         run: node scripts/fetch-acs-income.mjs
 
       - name: Upload dataset artifact
         uses: actions/upload-artifact@v4
         with:
           name: pr-income-data
-          path: |
-            public/pr_income_tracts.geojson
-            public/pr_income_meta.json
+          path: public/pr_income_by_tract.json
