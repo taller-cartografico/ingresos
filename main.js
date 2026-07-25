@@ -177,7 +177,7 @@ function init(tractsGeojson, municipiosGeojson, incomeData) {
   const legendEl = document.getElementById('legend');
   if (legendEl) {
     const edges = [round1000(values[0]), ...breaks, round1000(values[values.length - 1])];
-    let html = '<p class="legend-title">Ingreso Mediano Anual</p>';
+    let html = '<p class="legend-title">Mediana de Ingreso Anual</p>';
     for (let i = 0; i < NUM_CLASSES; i++) {
       const lo = currency.format(edges[i]);
       const hi = currency.format(edges[i + 1]);
@@ -369,7 +369,7 @@ function init(tractsGeojson, municipiosGeojson, incomeData) {
     const hasIncome = typeof props.median_income === 'number';
     const incomeBlock = hasIncome
       ? `<div class="income-figure">
-           <span class="caption">Ingreso mediano por hogar</span>
+           <span class="caption">Mediana de Ingresos por Hogar</span>
            <span class="value">${currency.format(props.median_income)}</span>
            <span class="moe">± ${currency.format(props.moe || 0)} (margen de error)</span>
          </div>
@@ -379,7 +379,7 @@ function init(tractsGeojson, municipiosGeojson, incomeData) {
            <tr><th>GEOID</th><td>${props.GEOID}</td></tr>
          </table>`
       : `<div class="income-figure">
-           <span class="caption">Ingreso mediano por hogar</span>
+           <span class="caption">Mediana de Ingresos por Hogar</span>
            <span class="value" style="color:var(--on-surface-variant,#424845);font-size:24px;">Sin datos</span>
          </div>
          <span class="no-data-badge">Dato suprimido o sector no residencial</span>
@@ -497,7 +497,7 @@ function init(tractsGeojson, municipiosGeojson, incomeData) {
       .map((f) => f.properties.median_income);
     if (tractIncomes.length) {
       const avg = tractIncomes.reduce((a, b) => a + b, 0) / tractIncomes.length;
-      municipioSummary.textContent = `Ingreso mediano promedio: ${currency.format(avg)} (${tractIncomes.length} sectores)`;
+      municipioSummary.textContent = `Mediana de ingresos promedio: ${currency.format(avg)} (${tractIncomes.length} sectores)`;
     } else {
       municipioSummary.textContent = 'Sin datos suficientes para este municipio.';
     }
