@@ -55,8 +55,8 @@ function hideLoadingOverlay() {
 }
 
 const mapLoaded = new Promise((resolve) => map.on('load', resolve)).then((r) => {
-  // Strip roads, buildings, and other basemap clutter so the choropleth reads cleanly.
-  const stripKeywords = ['road', 'street', 'bridge', 'tunnel', 'path', 'highway', 'building'];
+  // Strip roads, buildings, labels, and other basemap clutter so the choropleth reads cleanly.
+  const stripKeywords = ['road', 'street', 'bridge', 'tunnel', 'path', 'highway', 'building', 'label', 'poi', 'place'];
   map.getStyle().layers.forEach((layer) => {
     if (stripKeywords.some((keyword) => layer.id.toLowerCase().includes(keyword))) {
       map.removeLayer(layer.id);
