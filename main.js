@@ -251,33 +251,42 @@ function init(tractsGeojson, municipiosGeojson, incomeData) {
   }, 'water');
 
   // --- Hover: feature-state highlight + floating tooltip ---------------------
+  // Skip the hover tooltip entirely on touch devices: a tap fires a synthetic
+  // mousemove/mouseenter but never a real mouseleave, so it would get stuck
+  // floating on screen — and it's redundant anyway since tapping already
+  // opens the side panel with the same info.
+  const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
   let hoveredId = null;
-  const tooltip = document.createElement('div');
-  tooltip.className = 'hover-tooltip';
-  tooltip.style.cssText = 'position:absolute;display:none;pointer-events:none;z-index:30;background:var(--lino,#f2ede4);border:1px solid rgba(44,44,40,.15);border-radius:4px;padding:6px 10px;font-family:"Hanken Grotesk",sans-serif;font-size:13px;box-shadow:2px 2px 0 rgba(44,44,40,.15);max-width:240px;';
-  document.getElementById('app').appendChild(tooltip);
+  let tooltip = null;
 
-  map.on('mousemove', 'tracts-fill', (e) => {
-    map.getCanvas().style.cursor = 'pointer';
-    if (!e.features.length) return;
-    if (hoveredId !== null) map.setFeatureState({ source: 'tracts', id: hoveredId }, { hover: false });
-    hoveredId = e.features[0].id;
-    map.setFeatureState({ source: 'tracts', id: hoveredId }, { hover: true });
+  if (!isTouchDevice) {
+    tooltip = document.createElement('div');
+    tooltip.className = 'hover-tooltip';
+    tooltip.style.cssText = 'position:absolute;display:none;pointer-events:none;z-index:30;background:var(--lino,#f2ede4);border:1px solid rgba(44,44,40,.15);border-radius:4px;padding:6px 10px;font-family:"Hanken Grotesk",sans-serif;font-size:13px;box-shadow:2px 2px 0 rgba(44,44,40,.15);max-width:240px;';
+    document.getElementById('app').appendChild(tooltip);
 
-    const p = e.features[0].properties;
-    const incomeLabel = typeof p.median_income === 'number' ? currency.format(p.median_income) : 'Sin datos';
-    tooltip.innerHTML = `<strong>${p.municipio}</strong> — Sector ${p.NAME}<br/><span style="color:var(--primary,#1d3a2f);font-weight:700;">${incomeLabel}</span>`;
-    tooltip.style.display = 'block';
-    tooltip.style.left = `${e.point.x + 14}px`;
-    tooltip.style.top = `${e.point.y + 14}px`;
-  });
+    map.on('mousemove', 'tracts-fill', (e) => {
+      map.getCanvas().style.cursor = 'pointer';
+      if (!e.features.length) return;
+      if (hoveredId !== null) map.setFeatureState({ source: 'tracts', id: hoveredId }, { hover: false });
+      hoveredId = e.features[0].id;
+      map.setFeatureState({ source: 'tracts', id: hoveredId }, { hover: true });
 
-  map.on('mouseleave', 'tracts-fill', () => {
-    map.getCanvas().style.cursor = '';
-    if (hoveredId !== null) map.setFeatureState({ source: 'tracts', id: hoveredId }, { hover: false });
-    hoveredId = null;
-    tooltip.style.display = 'none';
-  });
+      const p = e.features[0].properties;
+      const incomeLabel = typeof p.median_income === 'number' ? currency.format(p.median_income) : 'Sin datos';
+      tooltip.innerHTML = `<strong>${p.municipio}</strong> — Sector ${p.NAME}<br/><span style="color:var(--primary,#1d3a2f);font-weight:700;">${incomeLabel}</span>`;
+      tooltip.style.display = 'block';
+      tooltip.style.left = `${e.point.x + 14}px`;
+      tooltip.style.top = `${e.point.y + 14}px`;
+    });
+
+    map.on('mouseleave', 'tracts-fill', () => {
+      map.getCanvas().style.cursor = '';
+      if (hoveredId !== null) map.setFeatureState({ source: 'tracts', id: hoveredId }, { hover: false });
+      hoveredId = null;
+      tooltip.style.display = 'none';
+    });
+  }
 
   // --- Side panel -------------------------------------------------------------
   const infoPanel = document.getElementById('info-panel');
