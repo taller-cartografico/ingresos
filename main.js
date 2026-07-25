@@ -33,6 +33,58 @@ const currency = new Intl.NumberFormat('es-PR', {
 });
 const number = new Intl.NumberFormat('es-PR');
 
+// Jenks natural breaks (Fisher-Jenks optimal 1D clustering). Returns an
+// array of numClasses+1 values: [min, break1, break2, ..., max].
+function jenksBreaks(data, numClasses) {
+  const sorted = data.slice().sort((a, b) => a - b);
+  const n = sorted.length;
+  const lowerClassLimits = Array.from({ length: n + 1 }, () => new Array(numClasses + 1).fill(0));
+  const varianceCombinations = Array.from({ length: n + 1 }, () => new Array(numClasses + 1).fill(Infinity));
+  let variance = 0;
+
+  for (let i = 1; i <= numClasses; i++) {
+    lowerClassLimits[1][i] = 1;
+    varianceCombinations[1][i] = 0;
+    for (let j = 2; j <= n; j++) varianceCombinations[j][i] = Infinity;
+  }
+
+  for (let l = 2; l <= n; l++) {
+    let sum = 0, sumSquares = 0, w = 0;
+    for (let m = 1; m <= l; m++) {
+      const lowerClassLimit = l - m + 1;
+      const val = sorted[lowerClassLimit - 1];
+      w++;
+      sum += val;
+      sumSquares += val * val;
+      variance = sumSquares - (sum * sum) / w;
+      const i4 = lowerClassLimit - 1;
+      if (i4 !== 0) {
+        for (let j = 2; j <= numClasses; j++) {
+          if (varianceCombinations[l][j] >= variance + varianceCombinations[i4][j - 1]) {
+            lowerClassLimits[l][j] = lowerClassLimit;
+            varianceCombinations[l][j] = variance + varianceCombinations[i4][j - 1];
+          }
+        }
+      }
+    }
+    lowerClassLimits[l][1] = 1;
+    varianceCombinations[l][1] = variance;
+  }
+
+  const kclass = new Array(numClasses + 1);
+  kclass[numClasses] = sorted[n - 1];
+  kclass[0] = sorted[0];
+  let count = n;
+  let countNum = numClasses;
+  while (countNum > 1) {
+    const id = lowerClassLimits[count][countNum] - 2;
+    kclass[countNum - 1] = sorted[id];
+    count = lowerClassLimits[count][countNum] - 1;
+    countNum--;
+  }
+  return kclass;
+}
+
 // ---------------------------------------------------------------------------
 // Loading overlay: real progress across the fetches below, with a small
 // minimum-duration floor so it doesn't just flash on a fast connection.
@@ -96,15 +148,13 @@ function init(tractsGeojson, municipiosGeojson, incomeData) {
   });
   values.sort((a, b) => a - b);
 
-  function quantileBreak(fraction) {
-    const idx = (values.length - 1) * fraction;
-    const lo = Math.floor(idx);
-    const hi = Math.ceil(idx);
-    if (lo === hi) return values[lo];
-    return values[lo] + (values[hi] - values[lo]) * (idx - lo);
-  }
-  const breaks = [];
-  for (let i = 1; i < NUM_CLASSES; i++) breaks.push(Math.round(quantileBreak(i / NUM_CLASSES)));
+  // Jenks natural breaks: finds the class boundaries that minimize variance
+  // within each class and maximize variance between classes, which reads
+  // more meaningfully for a skewed distribution like household income than
+  // an equal-count (quantile) split does.
+  const round1000 = (v) => Math.round(v / 1000) * 1000;
+  const rawJenks = jenksBreaks(values, NUM_CLASSES);
+  const breaks = rawJenks.slice(1, NUM_CLASSES).map(round1000);
 
   function percentileOf(value) {
     let lo = 0, hi = values.length;
@@ -118,7 +168,7 @@ function init(tractsGeojson, municipiosGeojson, incomeData) {
   // --- Legend ---------------------------------------------------------------
   const legendEl = document.getElementById('legend');
   if (legendEl) {
-    const edges = [values[0], ...breaks, values[values.length - 1]];
+    const edges = [round1000(values[0]), ...breaks, round1000(values[values.length - 1])];
     let html = '<p class="legend-title">Ingreso Mediano Anual</p>';
     for (let i = 0; i < NUM_CLASSES; i++) {
       const lo = currency.format(edges[i]);
