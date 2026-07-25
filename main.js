@@ -263,7 +263,7 @@ function init(tractsGeojson, municipiosGeojson, incomeData) {
     id: 'municipios-outline',
     type: 'line',
     source: 'municipios',
-    paint: { 'line-color': '#5a5a50', 'line-width': 0.9, 'line-opacity': 0.4 },
+    paint: { 'line-color': '#42423a', 'line-width': 1.6, 'line-opacity': 0.65 },
   }, 'water');
 
   map.addLayer({
