@@ -218,6 +218,30 @@ function init(tractsGeojson, municipiosGeojson, incomeData) {
     ],
   ];
 
+  // Adaptive label contrast: the two darkest fill classes get light text on
+  // a dark halo, everything else gets dark text on a light halo — otherwise
+  // a single fixed color needs an increasingly strong, glowing halo to stay
+  // legible as the fill gets darker, which is exactly what read as visual
+  // tension. Same break thresholds as the fill so the switch lines up.
+  const textColorExpr = [
+    'step', ['get', 'median_income'],
+    '#1c1c18',
+    breaks[0], '#1c1c18',
+    breaks[1], '#1c1c18',
+    breaks[2], '#1c1c18',
+    breaks[3], '#f2ede4',
+    breaks[4], '#f2ede4',
+  ];
+  const textHaloColorExpr = [
+    'step', ['get', 'median_income'],
+    'rgba(242, 237, 228, 0.8)',
+    breaks[0], 'rgba(242, 237, 228, 0.8)',
+    breaks[1], 'rgba(242, 237, 228, 0.8)',
+    breaks[2], 'rgba(242, 237, 228, 0.8)',
+    breaks[3], 'rgba(28, 28, 24, 0.65)',
+    breaks[4], 'rgba(28, 28, 24, 0.65)',
+  ];
+
   map.addLayer({
     id: 'tracts-fill',
     type: 'fill',
@@ -273,9 +297,9 @@ function init(tractsGeojson, municipiosGeojson, incomeData) {
       'text-padding': 3,
     },
     paint: {
-      'text-color': '#1c1c18',
-      'text-halo-color': 'rgba(242, 237, 228, 0.85)',
-      'text-halo-width': 1.4,
+      'text-color': textColorExpr,
+      'text-halo-color': textHaloColorExpr,
+      'text-halo-width': 1.1,
       // `zoom` may only appear as the direct input of a top-level
       // step/interpolate, so the feature-state overrides have to live in the
       // stop *outputs* rather than wrapping the whole interpolate in a case.
