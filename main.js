@@ -216,7 +216,7 @@ function init(tractsGeojson, municipiosGeojson, incomeData) {
     source: 'tracts',
     paint: {
       'fill-color': fillColorExpr,
-      'fill-opacity': ['case', ['boolean', ['feature-state', 'hover'], false], 0.9, 0.75],
+      'fill-opacity': ['case', ['boolean', ['feature-state', 'hover'], false], 0.95, 0.85],
     },
   }, 'water');
 
@@ -224,14 +224,14 @@ function init(tractsGeojson, municipiosGeojson, incomeData) {
     id: 'tracts-outline',
     type: 'line',
     source: 'tracts',
-    paint: { 'line-color': '#2c2c28', 'line-width': 0.5, 'line-opacity': 0.25 },
+    paint: { 'line-color': '#2c2c28', 'line-width': 0.5, 'line-opacity': 0.08 },
   }, 'water');
 
   map.addLayer({
     id: 'municipios-outline',
     type: 'line',
     source: 'municipios',
-    paint: { 'line-color': '#2c2c28', 'line-width': 1.2, 'line-opacity': 0.5 },
+    paint: { 'line-color': '#5a5a50', 'line-width': 0.9, 'line-opacity': 0.4 },
   }, 'water');
 
   map.addLayer({
