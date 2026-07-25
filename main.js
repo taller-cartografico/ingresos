@@ -54,7 +54,17 @@ function hideLoadingOverlay() {
   setTimeout(() => loadingOverlay.remove(), 500);
 }
 
-const mapLoaded = new Promise((resolve) => map.on('load', resolve)).then((r) => { bumpLoading(); return r; });
+const mapLoaded = new Promise((resolve) => map.on('load', resolve)).then((r) => {
+  // Strip road/street labels and lines from the basemap so the choropleth reads cleanly.
+  const roadKeywords = ['road', 'street', 'bridge', 'tunnel', 'path', 'highway'];
+  map.getStyle().layers.forEach((layer) => {
+    if (roadKeywords.some((keyword) => layer.id.toLowerCase().includes(keyword))) {
+      map.removeLayer(layer.id);
+    }
+  });
+  bumpLoading();
+  return r;
+});
 const tractsFetch = fetch(`${BASE}pr_tracts_boundaries.geojson`).then((r) => r.json()).then((d) => { bumpLoading(); return d; });
 const municipiosFetch = fetch(`${BASE}pr_municipios.geojson`).then((r) => r.json()).then((d) => { bumpLoading(); return d; });
 const incomeFetch = fetch(`${BASE}pr_income_by_tract.json`).then((r) => r.json()).then((d) => { bumpLoading(); return d; });
