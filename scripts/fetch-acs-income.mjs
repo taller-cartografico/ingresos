@@ -19,12 +19,22 @@ const TMP_DIR = path.resolve('scripts/tmp');
 const OUT_PATH = path.resolve('public/pr_income_tracts.geojson');
 const META_OUT_PATH = path.resolve('public/pr_income_meta.json');
 
+const BROWSER_HEADERS = {
+  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+  Accept: 'application/json, text/plain, */*',
+};
+
 async function fetchJson(url) {
-  const res = await fetch(url);
+  const res = await fetch(url, { headers: BROWSER_HEADERS });
+  const text = await res.text();
   if (!res.ok) {
-    throw new Error(`HTTP ${res.status} for ${url}`);
+    throw new Error(`HTTP ${res.status} for ${url}: ${text.slice(0, 300)}`);
   }
-  return res.json();
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error(`Non-JSON response for ${url}: ${text.slice(0, 300)}`);
+  }
 }
 
 async function fetchAcsIncomeByTract(year) {
@@ -52,7 +62,7 @@ async function fetchAcsIncomeByTract(year) {
 async function fetchTractBoundaries(year) {
   const url = `https://www2.census.gov/geo/tiger/GENZ${year}/shp/cb_${year}_${STATE_FIPS}_tract_500k.zip`;
   console.log(`Trying cartographic boundary vintage ${year}...`);
-  const res = await fetch(url);
+  const res = await fetch(url, { headers: BROWSER_HEADERS });
   if (!res.ok) {
     throw new Error(`HTTP ${res.status} for ${url}`);
   }
