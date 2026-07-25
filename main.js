@@ -85,6 +85,13 @@ function jenksBreaks(data, numClasses) {
   return kclass;
 }
 
+// Compact label for on-map text, e.g. 18791 -> "$19K".
+function formatShort(v) {
+  if (typeof v !== 'number') return '';
+  if (v >= 1000) return `$${Math.round(v / 1000)}K`;
+  return `$${v}`;
+}
+
 // ---------------------------------------------------------------------------
 // Loading overlay: real progress across the fetches below, with a small
 // minimum-duration floor so it doesn't just flash on a fast connection.
@@ -144,6 +151,7 @@ function init(tractsGeojson, municipiosGeojson, incomeData) {
     p.moe = income ? income.moe : null;
     p.households = income ? income.households : null;
     p.municipio = municipioByCountyfp.get(p.COUNTYFP) || (income && income.municipio) || 'Puerto Rico';
+    p.income_label = formatShort(p.median_income);
     if (typeof p.median_income === 'number') values.push(p.median_income);
   });
   values.sort((a, b) => a - b);
@@ -249,6 +257,42 @@ function init(tractsGeojson, municipiosGeojson, incomeData) {
     filter: ['==', 'municipio', ''],
     paint: { 'line-color': '#ffffff', 'line-width': 3, 'line-opacity': 0 },
   }, 'water');
+
+  // Per-tract income labels: fade in naturally once zoomed to roughly city
+  // scale, and force-show for whichever municipio is selected (regardless of
+  // zoom) while suppressing every other tract's label so the view stays calm.
+  map.addLayer({
+    id: 'tracts-labels',
+    type: 'symbol',
+    source: 'tracts',
+    filter: ['!=', ['get', 'median_income'], null],
+    layout: {
+      'text-field': ['get', 'income_label'],
+      'text-size': 11,
+      'text-allow-overlap': false,
+      'text-padding': 3,
+    },
+    paint: {
+      'text-color': '#1c1c18',
+      'text-halo-color': 'rgba(242, 237, 228, 0.85)',
+      'text-halo-width': 1.4,
+      // `zoom` may only appear as the direct input of a top-level
+      // step/interpolate, so the feature-state overrides have to live in the
+      // stop *outputs* rather than wrapping the whole interpolate in a case.
+      'text-opacity': [
+        'interpolate', ['linear'], ['zoom'],
+        10.5, ['case',
+          ['boolean', ['feature-state', 'dimmed'], false], 0,
+          ['boolean', ['feature-state', 'forceLabel'], false], 1,
+          0,
+        ],
+        12.5, ['case',
+          ['boolean', ['feature-state', 'dimmed'], false], 0,
+          1,
+        ],
+      ],
+    },
+  });
 
   // --- Hover: feature-state highlight + floating tooltip ---------------------
   // Skip the hover tooltip entirely on touch devices: a tap fires a synthetic
@@ -385,6 +429,21 @@ function init(tractsGeojson, municipiosGeojson, incomeData) {
     return [[minLng, minLat], [maxLng, maxLat]];
   }
 
+  // Force-show labels for the selected municipio's tracts (regardless of
+  // zoom) and hide every other tract's label; pass null to clear back to
+  // the normal zoom-based fade for all tracts.
+  function updateLabelFeatureStates(countyfp) {
+    tractsGeojson.features.forEach((f, idx) => {
+      if (!countyfp) {
+        map.setFeatureState({ source: 'tracts', id: idx }, { forceLabel: false, dimmed: false });
+      } else if (f.properties.COUNTYFP === countyfp) {
+        map.setFeatureState({ source: 'tracts', id: idx }, { forceLabel: true, dimmed: false });
+      } else {
+        map.setFeatureState({ source: 'tracts', id: idx }, { forceLabel: false, dimmed: true });
+      }
+    });
+  }
+
   select?.addEventListener('change', (e) => {
     const selected = e.target.value;
     if (!selected) {
@@ -393,6 +452,7 @@ function init(tractsGeojson, municipiosGeojson, incomeData) {
       map.flyTo({ center: [-66.45, 18.2], zoom: 8.3 });
       if (clearBtn) clearBtn.style.display = 'none';
       municipioSummary.textContent = '';
+      updateLabelFeatureStates(null);
       if (isMobile()) collapseMenu();
       return;
     }
@@ -407,6 +467,7 @@ function init(tractsGeojson, municipiosGeojson, incomeData) {
     if (feature) map.fitBounds(boundsOfFeature(feature), { padding: 60 });
 
     const countyfp = feature?.properties.countyfp;
+    updateLabelFeatureStates(countyfp);
     const tractIncomes = tractsGeojson.features
       .filter((f) => f.properties.COUNTYFP === countyfp && typeof f.properties.median_income === 'number')
       .map((f) => f.properties.median_income);
