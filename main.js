@@ -382,14 +382,12 @@ function init(tractsGeojson, municipiosGeojson, incomeData) {
          <table>
            <tr><th>Percentil en Puerto Rico</th><td>${percentileOf(props.median_income)}%</td></tr>
            <tr><th>Hogares (aprox.)</th><td>${props.households != null ? number.format(props.households) : '—'}</td></tr>
-           <tr><th>GEOID</th><td>${props.GEOID}</td></tr>
          </table>`
       : `<div class="income-figure">
            <span class="caption">Mediana de Ingresos por Hogar</span>
            <span class="value" style="color:var(--on-surface-variant,#424845);font-size:24px;">Sin datos</span>
          </div>
-         <span class="no-data-badge">Dato suprimido o sector no residencial</span>
-         <table><tr><th>GEOID</th><td>${props.GEOID}</td></tr></table>`;
+         <span class="no-data-badge">Dato suprimido o sector no residencial</span>`;
 
     infoContent.innerHTML = `
       <div class="income-data">
