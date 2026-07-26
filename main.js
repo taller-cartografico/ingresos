@@ -21,12 +21,16 @@ map.addControl(new maplibregl.GeolocateControl({
 
 map.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'bottom-right');
 
-// Lowest class uses Terracota (brand secondary) so the poorest tracts read
-// clearly instead of blending into the page background; the rest keeps the
-// sequential green ramp (Niebla -> Ceiba), light = lower-mid, dark = high income.
-const COLOR_RAMP = ['#a0522d', '#d8e2d1', '#b8c4bc', '#85a496', '#476558', '#1d3a2f'];
+// Lowest class uses a warm rose so the poorest tracts read clearly instead
+// of blending into the page background; the rest keeps the sequential
+// green ramp (Niebla -> Ceiba), light = lower-mid, dark = high income.
+const COLOR_RAMP = ['#d67f82', '#d8e2d1', '#b8c4bc', '#85a496', '#476558', '#1d3a2f'];
 const NO_DATA_COLOR = '#c1c8c3';
 const NUM_CLASSES = COLOR_RAMP.length;
+
+// Uninhabited nature reserve (Mona/Monito/Desecheo islands, 0 households) —
+// leave it uncolored rather than filling it like a normal "sin datos" tract.
+const UNPOPULATED_ISLAND_GEOID = '72097990000';
 
 const currency = new Intl.NumberFormat('es-PR', {
   style: 'currency',
@@ -206,6 +210,7 @@ function init(tractsGeojson, municipiosGeojson, incomeData) {
 
   const fillColorExpr = [
     'case',
+    ['==', ['get', 'GEOID'], UNPOPULATED_ISLAND_GEOID], 'rgba(0, 0, 0, 0)',
     ['==', ['get', 'median_income'], null], NO_DATA_COLOR,
     [
       'step',
