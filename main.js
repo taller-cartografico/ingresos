@@ -24,7 +24,7 @@ map.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'bottom-
 // Lowest class uses a warm rose so the poorest tracts read clearly instead
 // of blending into the page background; the rest keeps the sequential
 // green ramp (Niebla -> Ceiba), light = lower-mid, dark = high income.
-const COLOR_RAMP = ['#d67f82', '#e8b3b5', '#b8c4bc', '#85a496', '#476558', '#1d3a2f'];
+const COLOR_RAMP = ['#d67f82', '#e8b3b5', '#f1d2d3', '#85a496', '#476558', '#1d3a2f'];
 const NO_DATA_COLOR = '#c1c8c3';
 const NUM_CLASSES = COLOR_RAMP.length;
 
