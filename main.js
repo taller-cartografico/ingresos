@@ -21,8 +21,10 @@ map.addControl(new maplibregl.GeolocateControl({
 
 map.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'bottom-right');
 
-// Sequential single-hue ramp (Lino -> Ceiba), light = low income, dark = high income.
-const COLOR_RAMP = ['#f2ede4', '#d8e2d1', '#b8c4bc', '#85a496', '#476558', '#1d3a2f'];
+// Lowest class uses Terracota (brand secondary) so the poorest tracts read
+// clearly instead of blending into the page background; the rest keeps the
+// sequential green ramp (Niebla -> Ceiba), light = lower-mid, dark = high income.
+const COLOR_RAMP = ['#a0522d', '#d8e2d1', '#b8c4bc', '#85a496', '#476558', '#1d3a2f'];
 const NO_DATA_COLOR = '#c1c8c3';
 const NUM_CLASSES = COLOR_RAMP.length;
 
