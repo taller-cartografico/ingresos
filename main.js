@@ -28,10 +28,6 @@ const COLOR_RAMP = ['#d67f82', '#e8b3b5', '#c2d2cb', '#85a496', '#476558', '#1d3
 const NO_DATA_COLOR = '#c1c8c3';
 const NUM_CLASSES = COLOR_RAMP.length;
 
-// Uninhabited nature reserve (Mona/Monito/Desecheo islands, 0 households) —
-// leave it uncolored rather than filling it like a normal "sin datos" tract.
-const UNPOPULATED_ISLAND_GEOID = '72097990000';
-
 const currency = new Intl.NumberFormat('es-PR', {
   style: 'currency',
   currency: 'USD',
@@ -210,7 +206,7 @@ function init(tractsGeojson, municipiosGeojson, incomeData) {
 
   const fillColorExpr = [
     'case',
-    ['==', ['get', 'GEOID'], UNPOPULATED_ISLAND_GEOID], 'rgba(0, 0, 0, 0)',
+    ['==', ['get', 'households'], 0], 'rgba(0, 0, 0, 0)',
     ['==', ['get', 'median_income'], null], NO_DATA_COLOR,
     [
       'step',
