@@ -129,16 +129,17 @@ const mapLoaded = new Promise((resolve) => map.on('load', resolve)).then((r) => 
 const tractsFetch = fetch(`${BASE}pr_tracts_boundaries.geojson`).then((r) => r.json()).then((d) => { bumpLoading(); return d; });
 const municipiosFetch = fetch(`${BASE}pr_municipios.geojson`).then((r) => r.json()).then((d) => { bumpLoading(); return d; });
 const incomeFetch = fetch(`${BASE}pr_income_by_tract.json`).then((r) => r.json()).then((d) => { bumpLoading(); return d; });
+const islandsMaskFetch = fetch(`${BASE}pr_mona_monito_desecheo_mask.geojson`).then((r) => r.json());
 const minDuration = new Promise((resolve) => setTimeout(resolve, 700));
 
-Promise.all([mapLoaded, tractsFetch, municipiosFetch, incomeFetch, minDuration])
-  .then(([, tracts, municipios, income]) => init(tracts, municipios, income))
+Promise.all([mapLoaded, tractsFetch, municipiosFetch, incomeFetch, islandsMaskFetch, minDuration])
+  .then(([, tracts, municipios, income, islandsMask]) => init(tracts, municipios, income, islandsMask))
   .catch((err) => {
     console.error(err);
     if (loadingPct) loadingPct.textContent = 'Error al cargar los datos.';
   });
 
-function init(tractsGeojson, municipiosGeojson, incomeData) {
+function init(tractsGeojson, municipiosGeojson, incomeData, islandsMaskGeojson) {
   // --- Join income data onto tract features -------------------------------
   const municipioByCountyfp = new Map();
   municipiosGeojson.features.forEach((f) => {
@@ -318,6 +319,18 @@ function init(tractsGeojson, municipiosGeojson, incomeData) {
         ],
       ],
     },
+  });
+
+  // Mona/Monito/Desecheo sit inside the same tract polygon as a populated
+  // Mayagüez neighborhood (Census Tract 815.24), so they can't be excluded
+  // from the choropleth by GEOID alone — mask them with a plain overlay
+  // instead so the uninhabited islands never pick up an income color.
+  map.addSource('islands-mask', { type: 'geojson', data: islandsMaskGeojson });
+  map.addLayer({
+    id: 'islands-mask-fill',
+    type: 'fill',
+    source: 'islands-mask',
+    paint: { 'fill-color': '#f2ede4', 'fill-opacity': 1 },
   });
 
   // --- Hover: feature-state highlight + floating tooltip ---------------------
